@@ -167,6 +167,19 @@ namespace DatabaseFirstLINQ
             // Write a LINQ query that retreives all of the products in the shopping cart of users who have the role of "Employee".
             // Then print the user's email as well as the product's name, price, and quantity to the console.
 
+            var employeeUsers = _context.UserRoles.Include(ur => ur.Role).Include(ur => ur.User).Where(ur => ur.Role.RoleName == "Employee").ToList();
+            
+
+            foreach (UserRole employee in employeeUsers)
+            {
+                var shoppingCart = _context.ShoppingCarts.Include(us => us.Product).Include(us => us.User).Where(us => us.User == employee.User);
+                foreach (ShoppingCart employeeCart in shoppingCart)
+                {
+
+                    Console.WriteLine($"Email: {employee.User.Email} Product: { employeeCart.Product.Name} Price: { employeeCart.Product.Price} Quantity: { employeeCart.Quantity}");
+                }
+            }
+
         }
 
         // <><><><><><><><> CUD (Create, Update, Delete) Actions <><><><><><><><><>
