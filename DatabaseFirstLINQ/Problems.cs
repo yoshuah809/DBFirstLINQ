@@ -20,9 +20,9 @@ namespace DatabaseFirstLINQ
             //ProblemThree();
             //ProblemFour();
             //ProblemFive();
-            ProblemSix();
+            //ProblemSix();
             //ProblemSeven();
-            //ProblemEight();
+            ProblemEight();
             //ProblemNine();
             //ProblemTen();
             //ProblemEleven();
@@ -139,6 +139,13 @@ namespace DatabaseFirstLINQ
         private void ProblemEight()
         {
             // Write a LINQ query that retreives all of the products in the shopping cart of the user who has the email "afton@gmail.com".
+            var shopingcart = _context.ShoppingCarts.Include(us => us.Product).Include(us => us.User).Where(us => us.User.Email == "afton@gmail.com");
+            
+            foreach (ShoppingCart usercart in shopingcart)
+            {
+                Console.WriteLine($"Product: {usercart.Product.Name} Price: {usercart.Product.Price} Quantity: {usercart.Quantity}");
+            }
+
             // Then print the product's name, price, and quantity to the console.
 
         }
