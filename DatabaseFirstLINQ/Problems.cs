@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using DatabaseFirstLINQ.Models;
+using System.Collections.Generic;
 
 namespace DatabaseFirstLINQ
 {
@@ -392,9 +393,66 @@ namespace DatabaseFirstLINQ
             Console.WriteLine("Grand Total :" + grandTotals);
         }
 
+        private void DisplayShoppingCart(List<ShoppingCart> shoppingCartProducts)
+        {
+            foreach (var shoppingCartRow in shoppingCartProducts)
+            {
+                Console.WriteLine($"ID: {shoppingCartRow.Product.Id}  Name: {shoppingCartRow.Product.Name} Quantity: {shoppingCartRow.Quantity}");
+            }
+
+        }
+        private void SelectAddProduct(List<ShoppingCart> shoppingCartProducts) 
+        {
+            Console.WriteLine("Press the id number of a product to add it to your cart\nEnter '0' to exit the selection menu.");
+            int itemToAdd = int.Parse(Console.ReadLine());
+           
+            
+            while (itemToAdd != 0)
+                foreach (var shoppingCartRow in shoppingCartProducts)
+                {
+
+                    if (shoppingCartRow.Product.Id == itemToAdd)
+                        {
+                            shoppingCartRow.Quantity += 1;
+                            try
+                                {
+                                    _context.ShoppingCarts.Update(shoppingCartRow);
+                                    _context.SaveChanges();
+                                    Console.WriteLine("Item added to cart");
+                                    itemToAdd = int.Parse(Console.ReadLine());
+                                    DisplayShoppingCart(shoppingCartProducts);
+
+                        }
+                            catch
+                                {
+                                    Console.WriteLine("There was an error adding the item, please try again");
+                                    DisplayShoppingCart(shoppingCartProducts);
+                        }
+                        }
+                    /*else
+                    {
+                        ShoppingCart newShoppingCart = new ShoppingCart()
+                        {
+                            UserId = userId,
+                            ProductId = itemToAdd,
+                            Quantity = 1
+                        };
+                        _context.ShoppingCarts.Add(newShoppingCart);
+                        _context.SaveChanges();
+                        Console.WriteLine("Item added to cart");
+                        itemToAdd = int.Parse(Console.ReadLine());
+                    }*/
+
+                }
+
+        }
+
+
         // BIG ONE
         private void BonusThree()
         {
+
+           
 
             // 1. Create functionality for a user to sign in via the console
             // 2. If the user succesfully signs in
@@ -412,58 +470,27 @@ namespace DatabaseFirstLINQ
                     // a. Give them a menu where they perform the following actions within the console
                     // View the products in their shopping cart
                     // View all products in the Products table
-                    var shoppingCartProducts = _context.ShoppingCarts.Include(shoppingCart => shoppingCart.User).Include(shoppingCart => shoppingCart.Product).Where(shoppingCart => shoppingCart.User.Email == userEmail).ToList();
-                    Console.WriteLine("Press 1 for View your Shopping Cart\nPress 2 for view all products\n");
+                    List<ShoppingCart> shoppingCartProducts = _context.ShoppingCarts.Include(shoppingCart => shoppingCart.User).Include(shoppingCart => shoppingCart.Product).Where(shoppingCart => shoppingCart.User.Email == userEmail).ToList();
+                    Console.WriteLine("Press 1 for View your Shopping Cart\nPress 2 for view all Products\n");
                     int userOption = int.Parse(Console.ReadLine());
 
 
                     switch (userOption) 
                     {
                         case 1:
-                            
-                            foreach (var shoppingCartRow in shoppingCartProducts)
-                            {
-                                Console.WriteLine(shoppingCartRow.Product.Name);
-                            }
-                           
-                            
-                            break;
+                            DisplayShoppingCart(shoppingCartProducts);
+                            SelectAddProduct(shoppingCartProducts);
+
+
+
+                        break;
                         case 2:
                             var allProducts = _context.Products.ToList();
                             foreach (var product in allProducts)
                             {
                                 Console.WriteLine($"{product.Id}: Product: {product.Name}  Price: {product.Price}");
                             }
-                            Console.WriteLine("Press the id number of a product to add it to your cart\nEnter '0' to exit the selection menu.");
-                            int addItem = int.Parse(Console.ReadLine());
-                            while (addItem != 0)
-                            {
-                                foreach (var shoppingCartRow in shoppingCartProducts)
-                                {
-                                    if (shoppingCartRow.Product.Id == addItem)
-                                    {
-                                        shoppingCartRow.Quantity = shoppingCartRow.Quantity + 1;
-                                        _context.ShoppingCarts.Update(shoppingCartRow);
-                                        _context.SaveChanges();
-                                        Console.WriteLine("Item added to cart");
-                                        addItem = int.Parse(Console.ReadLine());
-                                    }
-                                    else
-                                    {
-                                        ShoppingCart newShoppingCart = new ShoppingCart()
-                                        {
-                                            UserId = userId,
-                                            ProductId = addItem,
-                                            Quantity = 1
-                                        };
-                                        _context.ShoppingCarts.Add(newShoppingCart);
-                                        _context.SaveChanges();
-                                        Console.WriteLine("Item added to cart");
-                                        addItem = int.Parse(Console.ReadLine());
-                                    }
-                            }
-                            }
-                            break;
+                           break;
                         default:
                             Console.WriteLine("Invalid input");
                             break;
@@ -476,7 +503,7 @@ namespace DatabaseFirstLINQ
                 {
                     Console.WriteLine("Invalid Email or Password.");
                 }
-
+               
 
             // Add a product to the shopping cart (incrementing quantity if that product is already in their shopping cart)
             // Remove a product from their shopping cart
