@@ -395,11 +395,69 @@ namespace DatabaseFirstLINQ
         // BIG ONE
         private void BonusThree()
         {
+
             // 1. Create functionality for a user to sign in via the console
             // 2. If the user succesfully signs in
-            // a. Give them a menu where they perform the following actions within the console
-            // View the products in their shopping cart
-            // View all products in the Products table
+            Console.WriteLine("Please Enter your email");
+            string userEmail = Console.ReadLine();
+            Console.WriteLine("\nPlease Enter your Password");
+            string userPassword = Console.ReadLine();
+
+
+            var userInput = _context.Users.Where(user => user.Email == userEmail && user.Password == userPassword).SingleOrDefault();
+         
+            try
+            {
+                if (userInput != null)
+                {
+                    Console.WriteLine("Signed In!");
+                    // a. Give them a menu where they perform the following actions within the console
+                    // View the products in their shopping cart
+                    // View all products in the Products table
+                    Console.WriteLine("Press 1 for View your Shopping Cart\nPress 2 for view all products");
+                    int userOption = int.Parse(Console.ReadLine());
+
+
+                    switch (userOption) 
+                    {
+                        case 1:
+                            var shoppingCartProducts = _context.ShoppingCarts.Include(shoppingCart => shoppingCart.User).Include(shoppingCart => shoppingCart.Product).Where(shoppingCart => shoppingCart.User.Email == userEmail).ToList();
+                            
+                            foreach (var shoppingCartRow in shoppingCartProducts)
+                            {
+                                Console.WriteLine(shoppingCartRow.Product.Name);
+                            }
+                           
+                            
+                            break;
+                        case 2:
+                            var allProducts = _context.Products.ToList();
+                            foreach (var product in allProducts)
+                            {
+                                Console.WriteLine($"Product: {product.Name}  Price: {product.Price}");
+                            }
+                            break;
+
+                        default:
+                            Console.WriteLine("Invalid input");
+                            break;
+
+                    }
+
+
+
+                }
+                else
+                {
+                    Console.WriteLine("Invalid Email or Password.");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("There is an Error, please try again ");
+            }
+
+
             // Add a product to the shopping cart (incrementing quantity if that product is already in their shopping cart)
             // Remove a product from their shopping cart
             // 3. If the user does not succesfully sing in
